@@ -7,7 +7,7 @@ v1.0 - Latest Version
 
 
 ## Current Functions:
-    Invoke-EmailSubjectSearch         -   Searches Email Subjects for matches against provided terms and returns email content.
+    Invoke-EmailSubjectSearch  -   Searches Email Subjects for matches against provided terms and returns email content.
     Invoke-EmailBodySearch     -   Searches Email bodys for matches against provided terms and returns email content.
 
 
