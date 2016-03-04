@@ -9,6 +9,9 @@ v1.0 - Latest Version
 ## Current Functions:
     Invoke-EmailSubjectSearch  -   Searches Email Subjects for matches against provided terms and returns email content.
     Invoke-EmailBodySearch     -   Searches Email bodys for matches against provided terms and returns email content.
+    
+## Example Run:  
+Invoke-EmailBodySearch -UserEmail administrator@ch33z.local -ExchangeVersion Exchange2013 -Credential "CH33KZ\administrator" -SearchTerms "password|Password|dawg" -DLLPath "C:\Users\Administrator\Documents\Microsoft.Exchange.WebServices.dll"
 
 
 
