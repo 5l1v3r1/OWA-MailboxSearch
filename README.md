@@ -1,5 +1,5 @@
 # OWA-MailboxSearch
-A PowerShell tool that leverages the EWS API to search Email Subject and Body content against user provided terms. For any given match both Email Subject and Body are returned for user viewing.
+A PowerShell tool that leverages the EWS API to search Email Subject and Body content against user provided terms. For any given match, both Email Subject and Body are returned for user viewing.
 
 Note: Requires the Microsoft.Exchange.WebServices.dll. See script for link to the 2.2 EWS API
 
