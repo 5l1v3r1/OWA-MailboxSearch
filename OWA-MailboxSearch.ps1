@@ -242,7 +242,9 @@ ForEach($folder in $FolderList ){
 
             #Present user with item subject and content
             Write-Output "Sender: " $MailItem.Sender.Address
+            Write-Output "___________________________________"
             Write-Output "Email Subject:" $Mailitem.Subject
+            Write-Output "___________________________________"
             Write-Output "Email Content:" $MailBody "`n"
             }   
         } 
@@ -368,7 +370,9 @@ ForEach($folder in $FolderList ){
 
             #Present user with item subject and content
             Write-Output "Sender: " $MailItem.Sender.Address
+            Write-Output "___________________________________"
             Write-Output "Email Subject:" $Mailitem.Subject
+            Write-Output "___________________________________"
             Write-Output "Email Content:" $MailBody "`n"
 
             }
