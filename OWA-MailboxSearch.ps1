@@ -221,7 +221,6 @@ try{
     $FolderList = Get-MailboxFolderIDs $exchService
 
 }
-
 catch{
 
     Write-Output "[-] Please review the script's Get-Help output to ensure parameters are correct,i.e. Get-Help Invoke-EmailSubjectSearch -Detailed. Error: $_"
