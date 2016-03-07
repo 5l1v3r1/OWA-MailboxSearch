@@ -24,6 +24,7 @@ Helper Functions Begin
 
 function Get-ExchangeVersion ($ExchangeVersion){
 
+
     #Set exchange version based upon user provided input
     switch ($ExchangeVersion){
         Exchange2007SP1{
@@ -61,17 +62,16 @@ function Get-ExchServiceObject ($UserEmail, $exchVUserProv, $UserName, $UserPass
     
     #Create a new object containing an EWS instance
     #Also feeds new object the user provided credentials and the autodiscover url
-
     $exchService = New-Object Microsoft.Exchange.WebServices.Data.ExchangeService($exchVUserProv) 
     $exchService.Credentials = New-Object System.Net.NetworkCredential -ArgumentList $UserName, $UserPassword, $UserDomain 
     $exchService.AutodiscoverUrl($UserEmail)
+
 
     return $exchService
 }
 
 function Get-MailboxFolderIDs ($exchService){
 
-    #Get-OWAFolderListing ($exchService){
     #Section to find all folders within a user's mailbox
     #Credits to http://gsexdev.blogspot.com/2012/01/ews-managed-api-and-powershell-how-to_23.html
     #Define Extended properties  
@@ -123,9 +123,17 @@ CMDLETS Begin
 function Invoke-EmailSubjectSearch{
 
 <#
+.SYNOPSIS
+
+Extract MailBox contents based upon user provided searchterms.
+
 .DESCRIPTION
 
 Invoke-EmailSubjectSearch is designed to search the subjects of any and all stored emails for references the user provides and to then present the email's contents.
+
+.LINK
+
+EWS API 2.2: https://www.microsoft.com/en-us/download/details.aspx?id=42951
 
 .PARAMETER UserEmail
 
@@ -138,6 +146,15 @@ Username in "DOMAIN\USERNAME" formation to present a credential entry pop up.
 .PARAMETER ExchangeVersion
 
 The Exchange version the MailBox you are targeting uses.
+
+Accepted Versions:
+
+Exchange2007_SP1
+Exchange2010
+Exchange2010_SP1
+Exchange2010_SP2
+Exchange2013
+Exchange2013_SP1
 
 .PARAMETER SearchTerms
 
@@ -157,21 +174,21 @@ Invoke-EmailSubjectSearch -UserEmail administrator@ch33z.local -ExchangeVersion 
 	
     [Parameter(Mandatory = $True)]
     [string]
-	$UserEmail,
+    $UserEmail,
 
-	[Parameter(Mandatory = $False)]
+    [Parameter(Mandatory = $False)]
     [ValidateNotNull()]
     [System.Management.Automation.PSCredential]
     [System.Management.Automation.Credential()]
-	$Credential = [System.Management.Automation.PSCredential]::Empty,
+    $Credential = [System.Management.Automation.PSCredential]::Empty,
 
-	[Parameter(Mandatory = $True)]
+    [Parameter(Mandatory = $True)]
     [string]
-	$ExchangeVersion,
+    $ExchangeVersion,
 
-	[Parameter(Mandatory = $True)]
+    [Parameter(Mandatory = $True)]
     [string]
-	$SearchTerms,
+    $SearchTerms,
 
     [Parameter(Mandatory = $True)]
     [string]
@@ -179,28 +196,37 @@ Invoke-EmailSubjectSearch -UserEmail administrator@ch33z.local -ExchangeVersion 
 
     )
 
+try{
+    #Add the assembly type for the API access
+    Add-Type -Path $DLLPath
 
-#Load the EWS API DLL
-Add-Type -Path $DLLPath
+    #Assigns appropriate version of Exchangeversion based on user provided value
+    $exchVUserProv = Get-ExchangeVersion $ExchangeVersion
 
-#Assigns appropriate version of Exchangeversion based on user provided value
-$exchVUserProv = Get-ExchangeVersion $ExchangeVersion
+    #Create a new object containing an EWS instance
+    #Also feeds new object the user provided credentials and the autodiscover url
+    $exchService = Get-ExchServiceObject $UserEmail $exchVUserProv $Credential.UserName $Credential.Password $Credential.Domain
 
-#Create a new object containing an EWS instance
-#Also feeds new object the user provided credentials and the autodiscover url
-$exchService = Get-ExchServiceObject $UserEmail $exchVUserProv $Credential.UserName $Credential.Password $Credential.Domain
+    #Section to search through items in identfied folders
+    #Credits to https://social.technet.microsoft.com/Forums/scriptcenter/en-US/335a888b-bf85-4a36-a555-71cc84608960/download-email-content-text-from-exchange-ews-with-powershell?forum=ITCG
+    #Define the Item view
+    $itemView = New-Object Microsoft.Exchange.WebServices.Data.ItemView(1000)
 
-#Section to search through items in identfied folders
-#Credits to https://social.technet.microsoft.com/Forums/scriptcenter/en-US/335a888b-bf85-4a36-a555-71cc84608960/download-email-content-text-from-exchange-ews-with-powershell?forum=ITCG
-#Define the Item view
-$itemView = New-Object Microsoft.Exchange.WebServices.Data.ItemView(1000)
+    #Define PropertySet so we receive the contents of the email without HTML
+    $PropertySet = New-Object Microsoft.Exchange.WebServices.Data.PropertySet([Microsoft.Exchange.WebServices.Data.BasePropertySet]::FirstClassProperties)
+    $PropertySet.RequestedBodyType = [Microsoft.Exchange.WebServices.Data.BodyType]::Text
 
-#Define PropertySet so we receive the contents of the email without HTML
-$PropertySet = New-Object Microsoft.Exchange.WebServices.Data.PropertySet([Microsoft.Exchange.WebServices.Data.BasePropertySet]::FirstClassProperties)
-$PropertySet.RequestedBodyType = [Microsoft.Exchange.WebServices.Data.BodyType]::Text
 
-#Call helper function to provide us with all folder ids
-$FolderList = Get-MailboxFolderIDs $exchService
+    #Call helper function to provide us with all folder ids
+    $FolderList = Get-MailboxFolderIDs $exchService
+
+}
+
+catch{
+
+    Write-Output "[-] Please review the script's Get-Help output to ensure parameters are correct,i.e. Get-Help Invoke-EmailSubjectSearch -Detailed. Error: $_"
+
+}
 
 #Search items within every identified folder
 ForEach($folder in $FolderList ){
@@ -215,6 +241,7 @@ ForEach($folder in $FolderList ){
             $MailBody = $MailItems.Body.Text -replace [Environment]::NewLine,""
 
             #Present user with item subject and content
+            Write-Output "Sender: " $MailItem.Sender.Address
             Write-Output "Email Subject:" $Mailitem.Subject
             Write-Output "Email Content:" $MailBody "`n"
             }   
@@ -226,9 +253,17 @@ ForEach($folder in $FolderList ){
 function Invoke-EmailBodySearch{
 <#
 
+.SYNOPSIS
+
+Extract MailBox contents based upon user provided searchterms.
+
 .DESCRIPTION
 
 Invoke-OWAEmailBodySearch is designed to search the body of any and all stored emails for references the user provides and to then present the email's contents in HTML format.
+
+.LINK
+
+EWS API 2.2: https://www.microsoft.com/en-us/download/details.aspx?id=42951
 
 .PARAMETER UserEmail
 
@@ -241,6 +276,15 @@ Username in "DOMAIN\USERNAME" formation to present a credential entry pop up.
 .PARAMETER ExchangeVersion
 
 The Exchange version the MailBox you are targeting uses.
+
+Accetped Versions:
+
+Exchange2007_SP1
+Exchange2010
+Exchange2010_SP1
+Exchange2010_SP2
+Exchange2013
+Exchange2013_SP1
 
 .PARAMETER SearchTerms
 
@@ -260,49 +304,56 @@ Invoke-EmailBodySearch -UserEmail administrator@ch33z.local -ExchangeVersion Exc
 	
     [Parameter(Mandatory = $True)]
     [string[]]
-	$UserEmail,
+    $UserEmail,
 
-	[Parameter(Mandatory = $False)]
+    [Parameter(Mandatory = $False)]
     [ValidateNotNull()]
     [System.Management.Automation.PSCredential]
     [System.Management.Automation.Credential()]
-	$Credential = [System.Management.Automation.PSCredential]::Empty,
+    $Credential = [System.Management.Automation.PSCredential]::Empty,
 
-	[Parameter(Mandatory = $True)]
+    [Parameter(Mandatory = $True)]
     [string]
-	$ExchangeVersion,
+    $ExchangeVersion,
 
-	[Parameter(Mandatory = $True)]
+    [Parameter(Mandatory = $True)]
     [string]
-	$SearchTerms,
+    $SearchTerms,
 
     [Parameter(Mandatory = $True)]
     [string]
     $DLLPath
 
     )
+try{
+    #Load the EWS API DLL
+    Add-Type -Path $DLLPath
 
-#Load the EWS API DLL
-Add-Type -Path $DLLPath
+    #Assigns appropriate version of Exchangeversion based on user provided value
+    $exchVUserProv = Get-ExchangeVersion $ExchangeVersion
 
-#Assigns appropriate version of Exchangeversion based on user provided value
-$exchVUserProv = Get-ExchangeVersion $ExchangeVersion
+    #Create a new object containing an EWS instance
+    #Also feeds new object the user provided credentials and the autodiscover url
+    $exchService = Get-ExchServiceObject $UserEmail $exchVUserProv $Credential.UserName $Credential.Password $Credential.Domain
 
-#Create a new object containing an EWS instance
-#Also feeds new object the user provided credentials and the autodiscover url
-$exchService = Get-ExchServiceObject $UserEmail $exchVUserProv $Credential.UserName $Credential.Password $Credential.Domain
+    #Section to search through items in identfied folders
+    #Credits to https://social.technet.microsoft.com/Forums/scriptcenter/en-US/335a888b-bf85-4a36-a555-71cc84608960/download-email-content-text-from-exchange-ews-with-powershell?forum=ITCG
+    #Create view for items
+    $itemView = New-Object Microsoft.Exchange.WebServices.Data.ItemView(1000)
 
-#Section to search through items in identfied folders
-#Credits to https://social.technet.microsoft.com/Forums/scriptcenter/en-US/335a888b-bf85-4a36-a555-71cc84608960/download-email-content-text-from-exchange-ews-with-powershell?forum=ITCG
-#Create view for items
-$itemView = New-Object Microsoft.Exchange.WebServices.Data.ItemView(1000)
+    #Define PropertySet so we receive the contents of the email without HTML
+    $PropertySet = New-Object Microsoft.Exchange.WebServices.Data.PropertySet([Microsoft.Exchange.WebServices.Data.BasePropertySet]::FirstClassProperties)
+    $PropertySet.RequestedBodyType = [Microsoft.Exchange.WebServices.Data.BodyType]::Text
 
-#Define PropertySet so we receive the contents of the email without HTML
-$PropertySet = New-Object Microsoft.Exchange.WebServices.Data.PropertySet([Microsoft.Exchange.WebServices.Data.BasePropertySet]::FirstClassProperties)
-$PropertySet.RequestedBodyType = [Microsoft.Exchange.WebServices.Data.BodyType]::Text
+    #Call helper function to provide us with all folder ids
+    $FolderList = Get-MailboxFolderIDs $exchService
 
-#Call helper function to provide us with all folder ids
-$FolderList = Get-MailboxFolderIDs $exchService
+}
+catch{
+
+    Write-Output "[-] Please review the script's Get-Help output to ensure parameters are correct, i.e. Get-Help Invoke-EmailBodySearch -Detailed. Error: $_"
+
+}
 
 #Search items within every identified folder
 ForEach($folder in $FolderList ){
@@ -316,6 +367,7 @@ ForEach($folder in $FolderList ){
             $MailBody = $MailItems.Body.Text -replace [Environment]::NewLine,""
 
             #Present user with item subject and content
+            Write-Output "Sender: " $MailItem.Sender.Address
             Write-Output "Email Subject:" $Mailitem.Subject
             Write-Output "Email Content:" $MailBody "`n"
 
@@ -324,4 +376,3 @@ ForEach($folder in $FolderList ){
       } 
       
 }
-
