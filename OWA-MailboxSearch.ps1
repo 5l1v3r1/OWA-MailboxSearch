@@ -238,7 +238,7 @@ ForEach($folder in $FolderList ){
         if($MailItem.Subject -match $SearchTerms){             
             #Load the email content with out predefined property set
             $MailItem.Load($PropertySet)
-            $MailBody = $MailItems.Body.Text -replace [Environment]::NewLine,""
+            $MailBody = $MailItems.Body.Text
 
             #Present user with item subject and content
             Write-Output "Sender: " $MailItem.Sender.Address
@@ -366,7 +366,7 @@ ForEach($folder in $FolderList ){
         $MailItem.Load($PropertySet)
         if($MailItem.Body.Text -match $SearchTerms){ 
             #Strip out newline chars      
-            $MailBody = $MailItems.Body.Text -replace [Environment]::NewLine,""
+            $MailBody = $MailItems.Body.Text
 
             #Present user with item subject and content
             Write-Output "Sender: " $MailItem.Sender.Address
