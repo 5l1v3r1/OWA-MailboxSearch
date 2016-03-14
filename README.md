@@ -4,7 +4,7 @@ A PowerShell tool that leverages the EWS API to search and pull content from an 
 Note: Requires the Microsoft.Exchange.WebServices.dll. See script for link to the 2.2 EWS API
 Note2: I've uploaded the v2.2 API's DLL. Feel free to use or not use as preferred.
 
-v1.0 - Latest Version
+v1.1 - Latest Version
 
 
 ## Current Functions:
