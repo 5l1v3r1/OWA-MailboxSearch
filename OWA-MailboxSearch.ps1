@@ -234,13 +234,13 @@ ForEach($folder in $FolderList ){
 
     ForEach($Mailitem in $Mailitems){
         
-        if($MailItem.Subject -match $SearchTerms){             
-            #Load the email content with out predefined property set
-            $MailItem.Load($PropertySet)
-            $MailBody = $MailItems.Body.Text
+        if($Mailitem.Subject -match $SearchTerms){             
+            #Loadthe email content with out predefined property set
+            $Mailitem.Load($PropertySet)
+            $MailBody = $Mailitems.Body.Text
 
             #Present user with item subject and content
-            Write-Output "Sender: " $MailItem.Sender.Address
+            Write-Output "Sender: " $Mailitem.Sender.Address
             Write-Output "___________________________________"
             Write-Output "Email Subject:" $Mailitem.Subject
             Write-Output "___________________________________"
@@ -362,13 +362,13 @@ ForEach($folder in $FolderList ){
     $Mailitems = $exchService.FindItems($folder,$itemView)
 
     ForEach($Mailitem in $Mailitems){
-        $MailItem.Load($PropertySet)
-        if($MailItem.Body.Text -match $SearchTerms){ 
+        $Mailitem.Load($PropertySet)
+        if($Mailitem.Body.Text -match $SearchTerms){ 
             #Strip out newline chars      
-            $MailBody = $MailItems.Body.Text
+            $MailBody = $Mailitems.Body.Text
 
             #Present user with item subject and content
-            Write-Output "Sender: " $MailItem.Sender.Address
+            Write-Output "Sender: " $Mailitem.Sender.Address
             Write-Output "___________________________________"
             Write-Output "Email Subject:" $Mailitem.Subject
             Write-Output "___________________________________"
@@ -379,3 +379,129 @@ ForEach($folder in $FolderList ){
       } 
       
 }
+function Get-FolderItems {
+<#
+
+.SYNOPSIS
+
+Extract MailBox contents based upon user provided folder name. Note: Only works for Well Known Folder Names. See "FolderName" parameter for listing.
+
+.DESCRIPTION
+
+Get-FolderItems is designed to pull all of the items (emails) of an entire folder.
+
+.LINK
+
+EWS API 2.2: https://www.microsoft.com/en-us/download/details.aspx?id=42951
+
+.PARAMETER UserEmail
+
+Email of the user whos mailbox you wish to search.
+
+.PARAMETER Credential
+
+Username in "DOMAIN\USERNAME" formation to present a credential entry pop up.
+
+.PARAMETER ExchangeVersion
+
+The Exchange version the MailBox you are targeting uses.
+
+Accetped Versions:
+
+Exchange2007_SP1
+Exchange2010
+Exchange2010_SP1
+Exchange2010_SP2
+Exchange2013
+Exchange2013_SP1
+
+.PARAMETER FolderName
+
+The name of the folder you wish to grab the contents of. Note: Only accepts a "WellKnownFolder" listed in https://msdn.microsoft.com/en-us/library/microsoft.exchange.webservices.data.wellknownfoldername(v=exchg.80).aspx
+
+.PARAMETER DLLPath
+
+Path to the Microsoft.Exchange.WebServices.dll.
+
+.EXAMPLE
+
+Get-FolderItems -UserEmail administrator@ch33z.local -ExchangeVersion Exchange2013 -Credential "CH33KZ\administrator" -FolderName "Notes" -DLLPath "C:\Users\Administrator\Documents\Microsoft.Exchange.WebServices.dll"
+
+#>
+    [CmdletBinding()]
+    Param(
+	
+    [Parameter(Mandatory = $True)]
+    [string[]]
+    $UserEmail,
+
+    [Parameter(Mandatory = $False)]
+    [ValidateNotNull()]
+    [System.Management.Automation.PSCredential]
+    [System.Management.Automation.Credential()]
+    $Credential = [System.Management.Automation.PSCredential]::Empty,
+
+    [Parameter(Mandatory = $True)]
+    [string]
+    $ExchangeVersion,
+
+    [Parameter(Mandatory = $True)]
+    [string]
+    $FolderName,
+
+    [Parameter(Mandatory = $True)]
+    [string]
+    $DLLPath
+
+    )
+try{
+
+    #Load the EWS API DLL
+    Add-Type -Path $DLLPath
+
+    #Assigns appropriate version of Exchangeversion based on user provided value
+    $exchVUserProv = Get-ExchangeVersion $ExchangeVersion
+
+    #Create a new object containing an EWS instance
+    #Also feeds new object the user provided credentials and the autodiscover url
+    $exchService = Get-ExchServiceObject $UserEmail $exchVUserProv $Credential.UserName $Credential.Password $Credential.Domain
+
+    #Section to search through items in identfied folders
+    #Credits to https://social.technet.microsoft.com/Forums/scriptcenter/en-US/335a888b-bf85-4a36-a555-71cc84608960/download-email-content-text-from-exchange-ews-with-powershell?forum=ITCG
+    #Create view for items
+    $itemView = New-Object Microsoft.Exchange.WebServices.Data.ItemView(1000)
+
+    #Define PropertySet so we receive the contents of the email without HTML
+    $PropertySet = New-Object Microsoft.Exchange.WebServices.Data.PropertySet([Microsoft.Exchange.WebServices.Data.BasePropertySet]::FirstClassProperties)
+    $PropertySet.RequestedBodyType = [Microsoft.Exchange.WebServices.Data.BodyType]::Text
+
+    #Call helper function to provide us with all folder ids
+    $FolderList = Get-MailboxFolderIDs $exchService
+
+    }
+catch{
+
+    Write-Output "[-] Please review the script's Get-Help output to ensure parameters are correct, i.e. Get-Help Get-FolderItems -Detailed. Error: $_"
+
+    }
+
+$Mailitems = $exchService.FindItems($FolderName,$itemView)
+
+do{
+    ForEach($Mailitem in $Mailitems.Items){
+        $Mailitem.Load($PropertySet)
+        #$MailItem.Load($PropertySet)
+        #ForEach( $i in    
+        $MailBody = $Mailitem.Body.Text
+
+        #Present user with item subject and content
+        Write-Output "___________________________________"
+        Write-Output "Email Subject:" $Mailitem.Subject
+        Write-Output "___________________________________"
+        Write-Output "Email Content:" $MailBody "`n"
+        }
+        $itemView.Offset += $Mailitems.Items.Count
+}while($Mailitem.MoreAvailable -eq $true)       
+
+}
+  
