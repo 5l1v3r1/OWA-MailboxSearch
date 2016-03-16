@@ -364,7 +364,7 @@ ForEach($folder in $FolderList ){
     ForEach($Mailitem in $Mailitems){
         $Mailitem.Load($PropertySet)
         if($Mailitem.Body.Text -match $SearchTerms){ 
-            #Strip out newline chars      
+      
             $MailBody = $Mailitem.Body.Text
 
             #Present user with item subject and content
@@ -490,8 +490,7 @@ $Mailitems = $exchService.FindItems($FolderName,$itemView)
 do{
     ForEach($Mailitem in $Mailitems.Items){
         $Mailitem.Load($PropertySet)
-        #$MailItem.Load($PropertySet)
-        #ForEach( $i in    
+
         $MailBody = $Mailitem.Body.Text
 
         #Present user with item subject and content
