@@ -10,7 +10,7 @@ Optional Dependencies: None
 
 .VERSION
 
-1.1
+1.2
 
 .LINK
 
@@ -58,14 +58,20 @@ function Get-ExchangeVersion ($ExchangeVersion){
 
 }
 
-function Get-ExchServiceObject ($UserEmail, $exchVUserProv, $UserName, $UserPassword, $UserDomain){
+function Get-ExchServiceObject ($UserEmail, $exchVUserProv, $UserName, $UserPassword, $UserDomain, $EWSUrl){
     
     #Create a new object containing an EWS instance
     #Also feeds new object the user provided credentials and the autodiscover url
     $exchService = New-Object Microsoft.Exchange.WebServices.Data.ExchangeService($exchVUserProv) 
     $exchService.Credentials = New-Object System.Net.NetworkCredential -ArgumentList $UserName, $UserPassword, $UserDomain 
-    $exchService.AutodiscoverUrl($UserEmail)
-
+    if ($EWSUrl){
+    
+        $exchService.Url = [System.URI]$EWSUrl
+        }
+    else{
+        
+        $exchService.AutodiscoverUrl($UserEmail)
+        }
 
     return $exchService
 }
@@ -172,11 +178,11 @@ Invoke-ItemSubjectSearch -UserEmail administrator@ch33z.local -ExchangeVersion E
     [CmdletBinding()]
     Param(
 	
-    [Parameter(Mandatory = $True)]
+    [Parameter(Mandatory = $False)]
     [string]
     $UserEmail,
 
-    [Parameter(Mandatory = $False)]
+    [Parameter(Mandatory = $True)]
     [ValidateNotNull()]
     [System.Management.Automation.PSCredential]
     [System.Management.Automation.Credential()]
@@ -192,8 +198,11 @@ Invoke-ItemSubjectSearch -UserEmail administrator@ch33z.local -ExchangeVersion E
 
     [Parameter(Mandatory = $True)]
     [string]
-    $DLLPath
+    $DLLPath,
 
+    [Parameter(Mandatory = $False)]
+    [string]
+    $EWSUrl
     )
 
 try{
@@ -204,8 +213,12 @@ try{
     $exchVUserProv = Get-ExchangeVersion $ExchangeVersion
 
     #Create a new object containing an EWS instance
-    #Also feeds new object the user provided credentials and the autodiscover url
-    $exchService = Get-ExchServiceObject $UserEmail $exchVUserProv $Credential.UserName $Credential.Password $Credential.Domain
+    if ($EWSUrl){
+        $exchService = Get-ExchServiceObject $UserEmail $exchVUserProv $Credential.UserName $Credential.Password $Credential.Domain $EWSUrl
+        }
+    else{
+        $exchService = Get-ExchServiceObject $UserEmail $exchVUserProv $Credential.UserName $Credential.Password $Credential.Domain
+        }
 
     #Section to search through items in identfied folders
     #Credits to https://social.technet.microsoft.com/Forums/scriptcenter/en-US/335a888b-bf85-4a36-a555-71cc84608960/download-email-content-text-from-exchange-ews-with-powershell?forum=ITCG
@@ -223,7 +236,7 @@ try{
 }
 catch{
 
-    Write-Output "[-] Please review the script's Get-Help output to ensure parameters are correct,i.e. Get-Help Invoke-EmailSubjectSearch -Detailed. Error: $_"
+    Write-Output "[-] Please review the script's Get-Help output to ensure parameters are correct,i.e. Get-Help Invoke-ItemSubjectSearch -Detailed. Error: $_"
 
 }
 
@@ -303,11 +316,11 @@ Invoke-ItemBodySearch -UserEmail administrator@ch33z.local -ExchangeVersion Exch
     [CmdletBinding()]
     Param(
 	
-    [Parameter(Mandatory = $True)]
+    [Parameter(Mandatory = $False)]
     [string[]]
     $UserEmail,
 
-    [Parameter(Mandatory = $False)]
+    [Parameter(Mandatory = $True)]
     [ValidateNotNull()]
     [System.Management.Automation.PSCredential]
     [System.Management.Automation.Credential()]
@@ -323,7 +336,11 @@ Invoke-ItemBodySearch -UserEmail administrator@ch33z.local -ExchangeVersion Exch
 
     [Parameter(Mandatory = $True)]
     [string]
-    $DLLPath
+    $DLLPath,
+
+    [Parameter(Mandatory = $False)]
+    [string]
+    $EWSUrl
 
     )
 try{
@@ -334,8 +351,12 @@ try{
     $exchVUserProv = Get-ExchangeVersion $ExchangeVersion
 
     #Create a new object containing an EWS instance
-    #Also feeds new object the user provided credentials and the autodiscover url
-    $exchService = Get-ExchServiceObject $UserEmail $exchVUserProv $Credential.UserName $Credential.Password $Credential.Domain
+    if ($EWSUrl){
+        $exchService = Get-ExchServiceObject $UserEmail $exchVUserProv $Credential.UserName $Credential.Password $Credential.Domain $EWSUrl
+        }
+    else{
+        $exchService = Get-ExchServiceObject $UserEmail $exchVUserProv $Credential.UserName $Credential.Password $Credential.Domain
+        }
 
     #Section to search through items in identfied folders
     #Credits to https://social.technet.microsoft.com/Forums/scriptcenter/en-US/335a888b-bf85-4a36-a555-71cc84608960/download-email-content-text-from-exchange-ews-with-powershell?forum=ITCG
@@ -352,7 +373,7 @@ try{
 }
 catch{
 
-    Write-Output "[-] Please review the script's Get-Help output to ensure parameters are correct, i.e. Get-Help Invoke-EmailBodySearch -Detailed. Error: $_"
+    Write-Output "[-] Please review the script's Get-Help output to ensure parameters are correct, i.e. Get-Help Invoke-ItemBodySearch -Detailed. Error: $_"
 
 }
 
@@ -431,11 +452,11 @@ Get-FolderItems -UserEmail administrator@ch33z.local -ExchangeVersion Exchange20
     [CmdletBinding()]
     Param(
 	
-    [Parameter(Mandatory = $True)]
+    [Parameter(Mandatory = $False)]
     [string[]]
     $UserEmail,
 
-    [Parameter(Mandatory = $False)]
+    [Parameter(Mandatory = $True)]
     [ValidateNotNull()]
     [System.Management.Automation.PSCredential]
     [System.Management.Automation.Credential()]
@@ -451,7 +472,11 @@ Get-FolderItems -UserEmail administrator@ch33z.local -ExchangeVersion Exchange20
 
     [Parameter(Mandatory = $True)]
     [string]
-    $DLLPath
+    $DLLPath,
+
+    [Parameter(Mandatory = $False)]
+    [string]
+    $EWSUrl
 
     )
 try{
@@ -463,8 +488,12 @@ try{
     $exchVUserProv = Get-ExchangeVersion $ExchangeVersion
 
     #Create a new object containing an EWS instance
-    #Also feeds new object the user provided credentials and the autodiscover url
-    $exchService = Get-ExchServiceObject $UserEmail $exchVUserProv $Credential.UserName $Credential.Password $Credential.Domain
+    if ($EWSUrl){
+        $exchService = Get-ExchServiceObject $UserEmail $exchVUserProv $Credential.UserName $Credential.Password $Credential.Domain $EWSUrl
+        }
+    else{
+        $exchService = Get-ExchServiceObject $UserEmail $exchVUserProv $Credential.UserName $Credential.Password $Credential.Domain
+        }
 
     #Section to search through items in identfied folders
     #Credits to https://social.technet.microsoft.com/Forums/scriptcenter/en-US/335a888b-bf85-4a36-a555-71cc84608960/download-email-content-text-from-exchange-ews-with-powershell?forum=ITCG
@@ -504,3 +533,4 @@ do{
 
 }
   
+
