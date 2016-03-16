@@ -120,7 +120,7 @@ Helper Functions End
 <#
 CMDLETS Begin
 #>
-function Invoke-EmailSubjectSearch{
+function Invoke-ItemSubjectSearch{
 
 <#
 .SYNOPSIS
@@ -129,7 +129,7 @@ Extract MailBox contents based upon user provided searchterms.
 
 .DESCRIPTION
 
-Invoke-EmailSubjectSearch is designed to search the subjects of any and all stored emails for references the user provides and to then present the email's contents.
+Invoke-ItemSubjectSearch is designed to search the subjects of any and all stored emails for references the user provides and to then present the email's contents.
 
 .LINK
 
@@ -166,7 +166,7 @@ Path to the Microsoft.Exchange.WebServices.dll.
 
 .EXAMPLE
 
-Invoke-EmailSubjectSearch -UserEmail administrator@ch33z.local -ExchangeVersion Exchange2013 -Credential "CH33KZ\administrator" -SearchTerms "password|Password|dawg" -DLLPath "C:\Users\Administrator\Documents\Microsoft.Exchange.WebServices.dll"
+Invoke-ItemSubjectSearch -UserEmail administrator@ch33z.local -ExchangeVersion Exchange2013 -Credential "CH33KZ\administrator" -SearchTerms "password|Password|dawg" -DLLPath "C:\Users\Administrator\Documents\Microsoft.Exchange.WebServices.dll"
 
 #>
     [CmdletBinding()]
@@ -251,7 +251,7 @@ ForEach($folder in $FolderList ){
       
 }
 
-function Invoke-EmailBodySearch{
+function Invoke-ItemBodySearch{
 <#
 
 .SYNOPSIS
@@ -260,7 +260,7 @@ Extract MailBox contents based upon user provided searchterms.
 
 .DESCRIPTION
 
-Invoke-OWAEmailBodySearch is designed to search the body of any and all stored emails for references the user provides and to then present the email's contents in HTML format.
+Invoke-ItemBodySearch is designed to search the body of any and all stored emails for references the user provides and to then present the email's contents in HTML format.
 
 .LINK
 
@@ -297,7 +297,7 @@ Path to the Microsoft.Exchange.WebServices.dll.
 
 .EXAMPLE
 
-Invoke-EmailBodySearch -UserEmail administrator@ch33z.local -ExchangeVersion Exchange2013 -Credential "CH33KZ\administrator" -SearchTerms "password|Password|dawg" -DLLPath "C:\Users\Administrator\Documents\Microsoft.Exchange.WebServices.dll"
+Invoke-ItemBodySearch -UserEmail administrator@ch33z.local -ExchangeVersion Exchange2013 -Credential "CH33KZ\administrator" -SearchTerms "password|Password|dawg" -DLLPath "C:\Users\Administrator\Documents\Microsoft.Exchange.WebServices.dll"
 
 #>
     [CmdletBinding()]
