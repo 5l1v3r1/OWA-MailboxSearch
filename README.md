@@ -8,8 +8,8 @@ v1.1 - Latest Version
 
 
 ## Current Functions:
-    Invoke-EmailSubjectSearch  -   Searches Email Subjects for matches against provided terms and returns email content.
-    Invoke-EmailBodySearch     -   Searches Email bodys for matches against provided terms and returns email content.
+    Invoke-ItemSubjectSearch  -   Searches Email Subjects for matches against provided terms and returns email content.
+    Invoke-ItemBodySearch     -   Searches Email bodys for matches against provided terms and returns email content.
     Get-FolderItems            -   Returns all emails within the user provided Mailbox folder.
     
     
