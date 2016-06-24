@@ -8,9 +8,9 @@ v1.1 - Latest Version
 
 
 ## Current Functions:
-    Invoke-ItemSubjectSearch  -   Searches Email Subjects for matches against provided terms and returns email content.
-    Invoke-ItemBodySearch     -   Searches Email bodys for matches against provided terms and returns email content.
-    Get-FolderItems           -   Returns all emails within the user provided Mailbox folder.
+    Invoke-SearchEmailSubject  -   Searches Email Subjects for matches against provided terms and returns email content.
+    Invoke-SearchEmailBody     -   Searches Email bodys for matches against provided terms and returns email content.
+    Get-FolderContents         -   Returns all emails within the user provided Mailbox folder.
     
 The Microsoft.Exchange.WebServices.dll is now embedded within the script to make it more portable.
     
