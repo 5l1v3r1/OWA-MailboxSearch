@@ -178,13 +178,9 @@ Exchange2013_SP1
 
 Terms you wish to search for seperated by a |.
 
-.PARAMETER DLLPath
-
-Path to the Microsoft.Exchange.WebServices.dll.
-
 .EXAMPLE
 
-Invoke-ItemSubjectSearch -UserEmail administrator@ch33z.local -ExchangeVersion Exchange2013 -Credential "CH33KZ\administrator" -SearchTerms "password|Password|dawg" -DLLPath "C:\Users\Administrator\Documents\Microsoft.Exchange.WebServices.dll"
+Invoke-ItemSubjectSearch -UserEmail administrator@ch33z.local -ExchangeVersion Exchange2013 -Credential "CH33KZ\administrator" -SearchTerms "password|Password|dawg"
 
 #>
     [CmdletBinding()]
@@ -310,13 +306,9 @@ Exchange2013_SP1
 
 Terms you wish to search for seperated by a |.
 
-.PARAMETER DLLPath
-
-Path to the Microsoft.Exchange.WebServices.dll.
-
 .EXAMPLE
 
-Invoke-ItemBodySearch -UserEmail administrator@ch33z.local -ExchangeVersion Exchange2013 -Credential "CH33KZ\administrator" -SearchTerms "password|Password|dawg" -DLLPath "C:\Users\Administrator\Documents\Microsoft.Exchange.WebServices.dll"
+Invoke-ItemBodySearch -UserEmail administrator@ch33z.local -ExchangeVersion Exchange2013 -Credential "CH33KZ\administrator" -SearchTerms "password|Password|dawg"
 
 #>
     [CmdletBinding()]
@@ -440,13 +432,9 @@ Exchange2013_SP1
 
 The name of the folder you wish to grab the contents of. Note: Only accepts a "WellKnownFolder" listed in https://msdn.microsoft.com/en-us/library/microsoft.exchange.webservices.data.wellknownfoldername(v=exchg.80).aspx
 
-.PARAMETER DLLPath
-
-Path to the Microsoft.Exchange.WebServices.dll.
-
 .EXAMPLE
 
-Get-FolderItems -UserEmail administrator@ch33z.local -ExchangeVersion Exchange2013 -Credential "CH33KZ\administrator" -FolderName "Notes" -DLLPath "C:\Users\Administrator\Documents\Microsoft.Exchange.WebServices.dll"
+Get-FolderItems -UserEmail administrator@ch33z.local -ExchangeVersion Exchange2013 -Credential "CH33KZ\administrator" -FolderName "Notes"
 
 #>
     [CmdletBinding()]
