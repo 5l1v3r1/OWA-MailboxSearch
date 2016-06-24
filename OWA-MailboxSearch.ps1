@@ -138,7 +138,7 @@ Helper Functions End
 <#
 CMDLETS Begin
 #>
-function Invoke-ItemSubjectSearch{
+function Invoke-SearchEmailSubject{
 
 <#
 .SYNOPSIS
@@ -147,7 +147,7 @@ Extract MailBox contents based upon user provided searchterms.
 
 .DESCRIPTION
 
-Invoke-ItemSubjectSearch is designed to search the subjects of any and all stored emails for references the user provides and to then present the email's contents.
+Invoke-SearchEmailSubject is designed to search the subjects of any and all stored emails for references the user provides and to then present the email's contents.
 
 .LINK
 
@@ -180,7 +180,7 @@ Terms you wish to search for seperated by a |.
 
 .EXAMPLE
 
-Invoke-ItemSubjectSearch -UserEmail administrator@ch33z.local -ExchangeVersion Exchange2013 -Credential "CH33KZ\administrator" -SearchTerms "password|Password|dawg"
+Invoke-SearchEmailSubject -UserEmail administrator@ch33z.local -ExchangeVersion Exchange2013 -Credential "CH33KZ\administrator" -SearchTerms "password|Password|dawg"
 
 #>
     [CmdletBinding()]
@@ -238,7 +238,7 @@ try{
 }
 catch{
 
-    Write-Output "[-] Please review the script's Get-Help output to ensure parameters are correct,i.e. Get-Help Invoke-ItemSubjectSearch -Detailed. Error: $_"
+    Write-Output "[-] Please review the script's Get-Help output to ensure parameters are correct,i.e. Get-Help Invoke-SearchEmailSubject -Detailed. Error: $_"
 
 }
 
@@ -266,7 +266,7 @@ ForEach($folder in $FolderList ){
       
 }
 
-function Invoke-ItemBodySearch{
+function Invoke-SearchEmailBody{
 <#
 
 .SYNOPSIS
@@ -275,7 +275,7 @@ Extract MailBox contents based upon user provided searchterms.
 
 .DESCRIPTION
 
-Invoke-ItemBodySearch is designed to search the body of any and all stored emails for references the user provides and to then present the email's contents in HTML format.
+Invoke-SearchEmailBody is designed to search the body of any and all stored emails for references the user provides and to then present the email's contents in HTML format.
 
 .LINK
 
@@ -308,7 +308,7 @@ Terms you wish to search for seperated by a |.
 
 .EXAMPLE
 
-Invoke-ItemBodySearch -UserEmail administrator@ch33z.local -ExchangeVersion Exchange2013 -Credential "CH33KZ\administrator" -SearchTerms "password|Password|dawg"
+Invoke-SearchEmailBody -UserEmail administrator@ch33z.local -ExchangeVersion Exchange2013 -Credential "CH33KZ\administrator" -SearchTerms "password|Password|dawg"
 
 #>
     [CmdletBinding()]
@@ -365,7 +365,7 @@ try{
 }
 catch{
 
-    Write-Output "[-] Please review the script's Get-Help output to ensure parameters are correct, i.e. Get-Help Invoke-ItemBodySearch -Detailed. Error: $_"
+    Write-Output "[-] Please review the script's Get-Help output to ensure parameters are correct, i.e. Get-Help Invoke-SearchEmailBody -Detailed. Error: $_"
 
 }
 
@@ -392,7 +392,7 @@ ForEach($folder in $FolderList ){
       } 
       
 }
-function Get-FolderItems {
+function Get-FolderContents{
 <#
 
 .SYNOPSIS
@@ -401,7 +401,7 @@ Extract MailBox contents based upon user provided folder name. Note: Only works 
 
 .DESCRIPTION
 
-Get-FolderItems is designed to pull all of the items (emails) of an entire folder.
+Get-FolderContents is designed to pull all of the items (emails) of an entire folder.
 
 .LINK
 
@@ -434,7 +434,7 @@ The name of the folder you wish to grab the contents of. Note: Only accepts a "W
 
 .EXAMPLE
 
-Get-FolderItems -UserEmail administrator@ch33z.local -ExchangeVersion Exchange2013 -Credential "CH33KZ\administrator" -FolderName "Notes"
+Get-FolderContents -UserEmail administrator@ch33z.local -ExchangeVersion Exchange2013 -Credential "CH33KZ\administrator" -FolderName "Notes"
 
 #>
     [CmdletBinding()]
@@ -491,7 +491,7 @@ try{
     }
 catch{
 
-    Write-Output "[-] Please review the script's Get-Help output to ensure parameters are correct, i.e. Get-Help Get-FolderItems -Detailed. Error: $_"
+    Write-Output "[-] Please review the script's Get-Help output to ensure parameters are correct, i.e. Get-Help Get-FolderContents -Detailed. Error: $_"
 
     }
 
