@@ -82,7 +82,7 @@ function Get-ExchServiceObject ($UserEmail, $exchVUserProv, $UserName, $UserPass
         }
     else{
         
-        $exchService.AutodiscoverUrl($UserEmail)
+        $exchService.AutodiscoverUrl($UserEmail,{$true})
         }
 
     return $exchService
