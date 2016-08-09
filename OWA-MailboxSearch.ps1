@@ -27,7 +27,7 @@ $MicrosoftExchangeWebservicesDllCompressed = @'
 $DeflatedStream = New-Object IO.Compression.DeflateStream([IO.MemoryStream][Convert]::FromBase64String($MicrosoftExchangeWebservicesDllCompressed),[IO.Compression.CompressionMode]::Decompress)
 $UncompressedFileBytes = New-Object Byte[](1130264)
 $DeflatedStream.Read($UncompressedFileBytes, 0, 1130264) | Out-Null
-[Reflection.Assembly]::Load($UncompressedFileBytes)
+[Reflection.Assembly]::Load($UncompressedFileBytes) |Out-Null
 
 
 <#
@@ -125,6 +125,8 @@ function Get-MailboxFolderIDs ($exchService){
         foreach($ffFolder in $fiResult.Folders){  
             #Append folder ID to array
             $folderList += $ffFolder.Id 
+
+             
         } 
 
     }while($fiResult.MoreAvailable -eq $true)
@@ -252,14 +254,13 @@ ForEach($folder in $FolderList ){
         if($Mailitem.Subject -match $SearchTerms){             
             #Loadthe email content with out predefined property set
             $Mailitem.Load($PropertySet)
-            $MailBody = $Mailitem.Body.Text
 
             #Present user with item subject and content
-            Write-Output "Sender: " $Mailitem.Sender.Address
+            Write-Output "From: " $Mailitem.From.Address
             Write-Output "___________________________________"
-            Write-Output "Email Subject:" $Mailitem.Subject
+            Write-Output "Subject:" $Mailitem.Subject
             Write-Output "___________________________________"
-            Write-Output "Email Content:" $MailBody "`n"
+            Write-Output "Body:" $Mailitem.Body.Text "`n"
             }   
         } 
       } 
@@ -377,15 +378,13 @@ ForEach($folder in $FolderList ){
     ForEach($Mailitem in $Mailitems){
         $Mailitem.Load($PropertySet)
         if($Mailitem.Body.Text -match $SearchTerms){ 
-      
-            $MailBody = $Mailitem.Body.Text
 
             #Present user with item subject and content
-            Write-Output "Sender: " $Mailitem.Sender.Address
+            Write-Output "From: " $Mailitem.Sender.Address
             Write-Output "___________________________________"
-            Write-Output "Email Subject:" $Mailitem.Subject
+            Write-Output "Subject:" $Mailitem.Subject
             Write-Output "___________________________________"
-            Write-Output "Email Content:" $MailBody "`n"
+            Write-Output "Body:" $Mailitem.Body.Text "`n"
 
             }
         }  
@@ -397,7 +396,7 @@ function Get-FolderContents{
 
 .SYNOPSIS
 
-Extract MailBox contents based upon user provided folder name. Note: Only works for Well Known Folder Names. See "FolderName" parameter for listing.
+Extract MailBox contents based upon user provided folder name. 
 
 .DESCRIPTION
 
@@ -428,13 +427,12 @@ Exchange2010_SP2
 Exchange2013
 Exchange2013_SP1
 
-.PARAMETER FolderName
-
-The name of the folder you wish to grab the contents of. Note: Only accepts a "WellKnownFolder" listed in https://msdn.microsoft.com/en-us/library/microsoft.exchange.webservices.data.wellknownfoldername(v=exchg.80).aspx
+.PARAMETER FolderID
+The base64 encoded ID of the folder you wish to extract all emails from. Note: Base64 value can be acquired from the "Value" field using the "Get-Folders" cmdlet
 
 .EXAMPLE
 
-Get-FolderContents -UserEmail administrator@ch33z.local -ExchangeVersion Exchange2013 -Credential "CH33KZ\administrator" -FolderName "Notes"
+Get-FolderContents -UserEmail administrator@ch33z.local -ExchangeVersion Exchange2013 -Credential "CH33KZ\administrator" -FolderID "BBMLLLLLAA2MKVBBBBMzNC1iYTg0IIIIIII0MBU2YQAuAAAAAAAQHLQaCeR2Sr9UKEnFkdAQKKKKSIvidnZYefDCCC="
 
 #>
     [CmdletBinding()]
@@ -456,7 +454,7 @@ Get-FolderContents -UserEmail administrator@ch33z.local -ExchangeVersion Exchang
 
     [Parameter(Mandatory = $True)]
     [string]
-    $FolderName,
+    $FolderID,
 
     [Parameter(Mandatory = $False)]
     [string]
@@ -495,22 +493,164 @@ catch{
 
     }
 
-$Mailitems = $exchService.FindItems($FolderName,$itemView)
+    foreach($id in $FolderList){
 
-do{
-    ForEach($Mailitem in $Mailitems.Items){
-        $Mailitem.Load($PropertySet)
+        if ($FolderID -eq $id.UniqueID){
 
-        $MailBody = $Mailitem.Body.Text
-
-        #Present user with item subject and content
-        Write-Output "___________________________________"
-        Write-Output "Email Subject:" $Mailitem.Subject
-        Write-Output "___________________________________"
-        Write-Output "Email Content:" $MailBody "`n"
+            $Mailitems = $exchService.FindItems($id,$itemView)
+            }
         }
+
+    do{
+        ForEach($Mailitem in $Mailitems.Items){
+            $Mailitem.Load($PropertySet)
+
+            #Present user with item subject and content
+            Write-Output "___________________________________"
+            Write-Output "Subject:" $Mailitem.Subject
+            Write-Output "___________________________________"
+            Write-Output "Body:" $Mailitem.Body.Text "`n"
+            }
         $itemView.Offset += $Mailitems.Items.Count
-}while($Mailitem.MoreAvailable -eq $true)       
+    }while($Mailitem.MoreAvailable -eq $true)
+}
+
+
+function Get-Folders{
+<#
+
+.SYNOPSIS
+
+Designed to enumerate the provided user's folders/IDs including both well-known and custom created folder names.
+
+.DESCRIPTION
+
+Get-Folders is designed to pull a listing of all folder names/IDs with the targeted user's mailbox.
+
+.LINK
+
+EWS API 2.2: https://www.microsoft.com/en-us/download/details.aspx?id=42951
+
+.PARAMETER UserEmail
+
+Email of the user whos mailbox you wish to search.
+
+.PARAMETER Credential
+
+Username in "DOMAIN\USERNAME" formation to present a credential entry pop up.
+
+.PARAMETER ExchangeVersion
+
+The Exchange version the MailBox you are targeting uses.
+
+Accetped Versions:
+
+Exchange2007_SP1
+Exchange2010
+Exchange2010_SP1
+Exchange2010_SP2
+Exchange2013
+Exchange2013_SP1
+
+.EXAMPLE
+
+Get-Folders -UserEmail administrator@ch33z.local -ExchangeVersion Exchange2013 -Credential "CH33KZ\administrator"
+
+#>
+    [CmdletBinding()]
+    Param(
+	
+    [Parameter(Mandatory = $False)]
+    [string[]]
+    $UserEmail,
+
+    [Parameter(Mandatory = $True)]
+    [ValidateNotNull()]
+    [System.Management.Automation.PSCredential]
+    [System.Management.Automation.Credential()]
+    $Credential = [System.Management.Automation.PSCredential]::Empty,
+
+    [Parameter(Mandatory = $True)]
+    [string]
+    $ExchangeVersion,
+
+    [Parameter(Mandatory = $False)]
+    [string]
+    $EWSUrl
+
+    )
+try{
+
+    #Assigns appropriate version of Exchangeversion based on user provided value
+    $exchVUserProv = Get-ExchangeVersion $ExchangeVersion
+
+    #Create a new object containing an EWS instance
+    if ($EWSUrl){
+        $exchService = Get-ExchServiceObject $UserEmail $exchVUserProv $Credential.UserName $Credential.Password $Credential.Domain $EWSUrl
+        }
+    else{
+        $exchService = Get-ExchServiceObject $UserEmail $exchVUserProv $Credential.UserName $Credential.Password $Credential.Domain
+        }
+
+
+    #Call helper function to provide us with all folder ids
+    $FolderList = Get-MailboxFolderIDs $exchService
+
+    }
+catch{
+
+    Write-Output "[-] Please review the script's Get-Help output to ensure parameters are correct, i.e. Get-Help Get-Folders -Detailed. Error: $_"
+
+    }
+
+    #Section to find all folders within a user's mailbox
+    #Credits to http://gsexdev.blogspot.com/2012/01/ews-managed-api-and-powershell-how-to_23.html
+    #Define Extended properties  
+    $PR_FOLDER_TYPE = New-Object Microsoft.Exchange.WebServices.Data.ExtendedPropertyDefinition(13825,[Microsoft.Exchange.WebServices.Data.MapiPropertyType]::Integer)
+    $folderidcnt = New-Object Microsoft.Exchange.WebServices.Data.FolderId([Microsoft.Exchange.WebServices.Data.WellKnownFolderName]::MsgFolderRoot)
+  
+    #Define the FolderView used for Export should not be any larger then 1000 folders due to throttling  
+    $fvFolderView =  New-Object Microsoft.Exchange.WebServices.Data.FolderView(1000) 
+ 
+    #Deep Transval will ensure all folders in the search path are returned  
+    $fvFolderView.Traversal = [Microsoft.Exchange.WebServices.Data.FolderTraversal]::Deep
+ 
+    $psPropertySet = New-Object Microsoft.Exchange.WebServices.Data.PropertySet([Microsoft.Exchange.WebServices.Data.BasePropertySet]::FirstClassProperties)  
+    $PR_MESSAGE_SIZE_EXTENDED = New-Object Microsoft.Exchange.WebServices.Data.ExtendedPropertyDefinition(3592,[Microsoft.Exchange.WebServices.Data.MapiPropertyType]::Long) 
+    $PR_DELETED_MESSAGE_SIZE_EXTENDED = New-Object Microsoft.Exchange.WebServices.Data.ExtendedPropertyDefinition(26267,[Microsoft.Exchange.WebServices.Data.MapiPropertyType]::Long)
+    $PR_Folder_Path = New-Object Microsoft.Exchange.WebServices.Data.ExtendedPropertyDefinition(26293, [Microsoft.Exchange.WebServices.Data.MapiPropertyType]::String)
+
+    #Add Properties to the  Property Set  
+    $psPropertySet.Add($PR_MESSAGE_SIZE_EXTENDED) 
+    $psPropertySet.Add($PR_Folder_Path);  
+    $fvFolderView.PropertySet = $psPropertySet
+
+    #The Search filter will exclude any Search Folders  
+    $sfSearchFilter = New-Object Microsoft.Exchange.WebServices.Data.SearchFilter+IsEqualTo($PR_FOLDER_TYPE,"1")  
+    $fiResult = $null 
+
+    #Initialize array to store folder names
+    $folderList = @{}
+
+    #The Do loop will handle any paging that is required if there are more the 1000 folders in a mailbox  
+    do {  
+        $fiResult = $exchService.FindFolders($folderidcnt,$sfSearchFilter,$fvFolderView)  
+        foreach($ffFolder in $fiResult.Folders){  
+            #Append folder ID to array
+
+            if (-not $folderList.ContainsKey($ffFolder.DisplayName)){
+
+                $folderList.Add($ffFolder.DisplayName, $ffFolder.Id)
+
+            }
+
+             
+        } 
+
+    }while($fiResult.MoreAvailable -eq $true)
+
+    #Hash Table returned listing human readable folder displayname and associated unique id
+    $folderList | Format-Table -AutoSize             
 
 }
   
