@@ -10,7 +10,8 @@ v1.1 - Latest Version
 ## Current Functions:
     Invoke-SearchEmailSubject  -   Searches Email Subjects for matches against provided terms and returns email content.
     Invoke-SearchEmailBody     -   Searches Email bodys for matches against provided terms and returns email content.
-    Get-FolderContents         -   Returns all emails within the user provided Mailbox folder.
+    Get-FolderContents         -   Returns all emails within the user provided folder id, acquired from Get-Folders.
+    Get-Folders                -   Returns hash table containing all folder names and associated ids.
     
 *The Microsoft.Exchange.WebServices.dll is now embedded within the script to make it more portable.
     
