@@ -7,7 +7,7 @@ Note2: I've uploaded the v2.2 API's DLL. Feel free to use or not use as preferre
 
 ## Current Functions:
     Invoke-SearchEmailSubject  -   Searches Email Subjects for matches against provided terms and returns email content.
-    Invoke-SearchEmailBody     -   Searches Email bodys for matches against provided terms and returns email content.
+    Invoke-SearchEmailBody     -   Searches Email Bodys for matches against provided terms and returns email content.
     Get-FolderContents         -   Returns all emails within the user provided folder id, acquired from Get-Folders.
     Get-Folders                -   Returns hash table containing all folder names and associated ids.
     
