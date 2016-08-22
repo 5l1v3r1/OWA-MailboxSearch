@@ -1,8 +1,7 @@
 # OWA-MailboxSearch
 A PowerShell tool that leverages the EWS API to search and pull content from an MS Exchange user's Mailbox. In all cmdlets the email subject and body are returned for viewing.
 
-Note: Requires the Microsoft.Exchange.WebServices.dll. See script for link to the 2.2 EWS API
-Note2: I've uploaded the v2.2 API's DLL. Feel free to use or not use as preferred.
+Note: The Microsoft.Exchange.WebServices.dll is now embedded within the script to make it more portable.
 
 
 ## Current Functions:
@@ -11,7 +10,7 @@ Note2: I've uploaded the v2.2 API's DLL. Feel free to use or not use as preferre
     Get-FolderContents         -   Returns all emails within the user provided folder id, acquired from Get-Folders.
     Get-Folders                -   Returns hash table containing all folder names and associated ids.
     
-*The Microsoft.Exchange.WebServices.dll is now embedded within the script to make it more portable.
+
     
 
 
